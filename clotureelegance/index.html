@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MT Clôture Élégance — Estimateur / Estimator</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --charcoal:#2b2b2b; --gold:#b8924a; --gold-d:#9a7838;
+    --paper:#f7f5f1; --line:#e3ddd2; --white:#fff; --muted:#7a756c; --ok:#2f7d4f; --err:#b23b3b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',-apple-system,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--paper);line-height:1.5}
+  header{background:var(--charcoal);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:600;letter-spacing:.5px}
+  .brand .mark{width:34px;height:34px;border:2px solid var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700}
+  .brand small{display:block;font-weight:400;color:#cfc8bb;font-size:11px;letter-spacing:1px;text-transform:uppercase}
+  .htools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .lang button,.btn{cursor:pointer;border:none;font-size:13px;border-radius:6px;padding:8px 12px}
+  .lang button{background:transparent;color:#cfc8bb;border:1px solid #4a4a4a}
+  .lang button.active{background:var(--gold);color:#1a1a1a;border-color:var(--gold);font-weight:600}
+  .btn{background:var(--gold);color:#1a1a1a;font-weight:600}
+  .btn:hover{background:var(--gold-d);color:#fff}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.ghost{background:transparent;border:1px solid var(--gold);color:var(--gold)}
+  .btn.ghost:hover{background:var(--gold);color:#1a1a1a}
+  .btn.sm{padding:6px 10px;font-size:12px}
+  .who{font-size:12px;color:#cfc8bb;display:flex;align-items:center;gap:8px}
+  main{max-width:1000px;margin:0 auto;padding:26px 18px 60px}
+  .view{display:none}
+  .view.active{display:block}
+  h1{font-size:26px;margin:0 0 4px;font-weight:600}
+  .sub{color:var(--muted);margin:0 0 22px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:1fr 1fr 1fr}
+  @media(max-width:680px){.g2,.g3{grid-template-columns:1fr}}
+  label{display:block;font-size:13px;font-weight:600;margin:0 0 5px;color:var(--charcoal)}
+  input,select,textarea{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit;background:#fff}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-color:var(--gold)}
+  .help{font-size:12px;color:var(--muted);margin-top:4px}
+  .est-box{background:linear-gradient(135deg,#2b2b2b,#3a3a3a);color:#fff;border-radius:12px;padding:24px;text-align:center}
+  .est-box .num{font-size:13px;letter-spacing:2px;color:var(--gold);text-transform:uppercase}
+  .est-box .range{font-size:32px;font-weight:700;margin:8px 0}
+  .est-box .note{font-size:12px;color:#cfc8bb}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  td.r,th.r{text-align:right}
+  .pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+  .pill.new{background:#e8f1ec;color:var(--ok)}
+  .pill.sent{background:#fdf3e2;color:var(--gold-d)}
+  .pill.quoted{background:#e7eef7;color:#3060a0}
+  .pill.won{background:#e8f1ec;color:var(--ok)}
+  .pill.lost{background:#f7e9e9;color:var(--err)}
+  .tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+  .tabs button{background:#fff;border:1px solid var(--line);padding:9px 15px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--charcoal)}
+  .tabs button.active{background:var(--charcoal);color:#fff;border-color:var(--charcoal)}
+  .login-wrap{max-width:400px;margin:50px auto}
+  .msg{padding:10px 12px;border-radius:8px;font-size:13px;margin-top:10px;display:none}
+  .msg.ok{background:#e8f1ec;color:var(--ok);display:block}
+  .msg.err{background:#fbeaea;color:var(--err);display:block}
+  .msg.info{background:#eef1f5;color:#445;display:block}
+  .seed{font-size:12px;color:var(--muted);background:#f0ece4;border-radius:8px;padding:10px 12px;margin-top:14px}
+  .config-prod{border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+  .config-prod h3{margin:0 0 10px;font-size:16px}
+  .ht-row{display:flex;gap:8px;align-items:center;margin-bottom:7px}
+  .ht-row input{max-width:120px}
+  .ht-row .lbl{font-size:13px;min-width:90px}
+  .foot{font-size:12px;color:var(--muted);text-align:center;margin-top:30px}
+  .inline{display:flex;gap:10px;align-items:center}
+  .badge-admin{background:var(--gold);color:#1a1a1a;border-radius:5px;padding:1px 7px;font-size:11px;font-weight:700}
+  .badge-sales{background:#4a4a4a;color:#fff;border-radius:5px;padding:1px 7px;font-size:11px;font-weight:700}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid #cfc8bb;border-top-color:var(--gold);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .overlay{position:fixed;inset:0;background:rgba(247,245,241,.7);display:flex;align-items:center;justify-content:center;z-index:50;font-size:14px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="mark">CE</span>
+    <div>MT Clôture Élégance<small id="tagline">Estimateur de prix</small></div>
+  </div>
+  <div class="htools">
+    <span class="lang">
+      <button id="lang-fr" class="active" onclick="setLang('fr')">FR</button>
+      <button id="lang-en" onclick="setLang('en')">EN</button>
+    </span>
+    <span class="who" id="whoami"></span>
+    <button class="btn sm ghost" id="loginBtn" onclick="go('login')"></button>
+    <button class="btn sm ghost" id="dashBtn" style="display:none" onclick="go('dash')"></button>
+    <button class="btn sm ghost" id="logoutBtn" style="display:none" onclick="logout()"></button>
+  </div>
+</header>
+
+<main>
+  <!-- ============ ESTIMATOR ============ -->
+  <section id="view-estimator" class="view active">
+    <h1 id="t-est-title"></h1>
+    <p class="sub" id="t-est-sub"></p>
+    <div class="grid g2">
+      <div>
+        <div class="card">
+          <div class="grid">
+            <div>
+              <label id="l-product"></label>
+              <select id="f-product" onchange="renderHeights();calc()"></select>
+            </div>
+            <div class="grid g2">
+              <div>
+                <label id="l-height"></label>
+                <select id="f-height" onchange="calc()"></select>
+              </div>
+              <div>
+                <label id="l-length"></label>
+                <input id="f-length" type="number" min="0" value="100" oninput="calc()">
+                <div class="help" id="h-length"></div>
+              </div>
+            </div>
+            <div class="grid g2">
+              <div><label id="l-walk"></label><input id="f-walk" type="number" min="0" value="1" oninput="calc()"></div>
+              <div><label id="l-drive"></label><input id="f-drive" type="number" min="0" value="0" oninput="calc()"></div>
+            </div>
+            <div class="grid g2">
+              <div>
+                <label id="l-terrain"></label>
+                <select id="f-terrain" onchange="calc()">
+                  <option value="0" data-fr="Terrain normal / plat" data-en="Normal / flat terrain"></option>
+                  <option value="1" data-fr="Terrain en pente / difficile" data-en="Sloped / difficult terrain"></option>
+                </select>
+              </div>
+              <div>
+                <label id="l-removal"></label>
+                <select id="f-removal" onchange="calc()">
+                  <option value="0" data-fr="Non" data-en="No"></option>
+                  <option value="1" data-fr="Oui — retirer l'ancienne clôture" data-en="Yes — remove old fence"></option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <label id="l-cust"></label>
+          <div class="grid g2" style="margin-top:6px">
+            <input id="c-name" placeholder=""><input id="c-phone" placeholder="">
+          </div>
+          <div class="grid g2" style="margin-top:10px">
+            <input id="c-email" placeholder=""><input id="c-postal" placeholder="">
+          </div>
+          <textarea id="c-msg" rows="2" placeholder="" style="margin-top:10px"></textarea>
+        </div>
+      </div>
+      <div>
+        <div class="est-box">
+          <div class="num" id="o-num">CE-____-____</div>
+          <div class="range" id="o-range">—</div>
+          <div class="note" id="o-note"></div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <table><thead><tr><th id="th-item"></th><th class="r" id="th-amt"></th></tr></thead>
+          <tbody id="o-lines"></tbody></table>
+        </div>
+        <button class="btn" style="width:100%" id="btn-send" onclick="sendEstimate()"></button>
+        <div class="msg" id="send-msg"></div>
+        <div class="seed" id="disclaimer"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LOGIN ============ -->
+  <section id="view-login" class="view">
+    <div class="login-wrap card">
+      <h1 id="t-login-title" style="font-size:21px"></h1>
+      <p class="sub" id="t-login-sub" style="margin-bottom:16px"></p>
+      <label id="l-email"></label>
+      <input id="li-email" type="email" autocomplete="email" placeholder="nom@clotureelegance.com">
+      <button class="btn" style="width:100%;margin-top:16px" id="btn-dologin" onclick="sendMagicLink()"></button>
+      <div class="msg" id="login-msg"></div>
+      <div class="seed" id="login-hint"></div>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section id="view-dash" class="view">
+    <h1 id="t-dash-title"></h1>
+    <p class="sub" id="t-dash-sub"></p>
+    <div class="tabs" id="dash-tabs">
+      <button class="active" data-tab="estimates" onclick="setTab('estimates')" id="tab-est-btn"></button>
+      <button data-tab="config" onclick="setTab('config')" id="tab-config-btn"></button>
+      <button data-tab="users" onclick="setTab('users')" id="tab-users-btn"></button>
+    </div>
+
+    <div id="tab-estimates">
+      <div class="card">
+        <div class="inline" style="justify-content:space-between;margin-bottom:10px">
+          <strong id="est-list-h"></strong>
+          <button class="btn sm" onclick="go('estimator')" id="btn-new-est"></button>
+        </div>
+        <table><thead><tr>
+          <th id="th-no"></th><th id="th-cust"></th><th id="th-prod"></th>
+          <th class="r" id="th-range"></th><th id="th-by"></th><th id="th-status"></th><th id="th-date"></th>
+        </tr></thead><tbody id="est-rows"></tbody></table>
+      </div>
+    </div>
+
+    <div id="tab-config" style="display:none">
+      <div class="card">
+        <strong id="cfg-h"></strong>
+        <p class="help" id="cfg-help"></p>
+        <div id="cfg-products"></div>
+        <hr style="border:none;border-top:1px solid var(--line);margin:18px 0">
+        <strong id="cfg-extras-h"></strong>
+        <div class="grid g3" style="margin-top:10px">
+          <div><label id="lc-walk"></label><input id="cfg-walk" type="number"></div>
+          <div><label id="lc-drive"></label><input id="cfg-drive" type="number"></div>
+          <div><label id="lc-removal"></label><input id="cfg-removal" type="number"></div>
+          <div><label id="lc-slope"></label><input id="cfg-slope" type="number"></div>
+          <div><label id="lc-range"></label><input id="cfg-range" type="number"></div>
+          <div><label id="lc-min"></label><input id="cfg-min" type="number"></div>
+        </div>
+        <button class="btn" style="margin-top:16px" onclick="saveConfig()" id="btn-savecfg"></button>
+        <div class="msg" id="cfg-msg"></div>
+      </div>
+    </div>
+
+    <div id="tab-users" style="display:none">
+      <div class="card">
+        <strong id="usr-h"></strong>
+        <p class="help" id="usr-help"></p>
+        <table><thead><tr><th id="th-uemail"></th><th id="th-urole"></th></tr></thead>
+        <tbody id="usr-rows"></tbody></table>
+        <div class="seed" id="usr-invite"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot" id="footer"></div>
+</main>
+
+<div class="overlay" id="boot"><span><span class="spin"></span> &nbsp;Chargement…</span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ================= CONFIG: your Supabase project ================= */
+const SUPABASE_URL = "https://awcxmddlfwrrldwqnlbf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_27RBWBo7G76hT7cE1ttQWQ_gb2Q6YGU";
+const COMPANY_EMAIL = "clotureelegance@outlook.com";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ================= i18n ================= */
+const T = {
+  tagline:{fr:"Estimateur de prix",en:"Price Estimator"},
+  loginBtn:{fr:"Connexion",en:"Log in"},
+  dashBtn:{fr:"Tableau de bord",en:"Dashboard"},
+  logoutBtn:{fr:"Déconnexion",en:"Log out"},
+  estTitle:{fr:"Estimateur de clôture",en:"Fence Estimator"},
+  estSub:{fr:"Obtenez une estimation instantanée pour votre projet de clôture à Laval, Montréal et les environs.",en:"Get an instant ballpark estimate for your fence project in Laval, Montréal and surrounding areas."},
+  product:{fr:"Type de clôture",en:"Fence type"},
+  height:{fr:"Hauteur",en:"Height"},
+  length:{fr:"Longueur (pieds)",en:"Length (feet)"},
+  lengthHelp:{fr:"Longueur totale linéaire à clôturer.",en:"Total linear length to fence."},
+  walk:{fr:"Barrières piétonnes (nb)",en:"Walk gates (qty)"},
+  drive:{fr:"Barrières doubles / accès (nb)",en:"Double / drive gates (qty)"},
+  terrain:{fr:"Terrain",en:"Terrain"},
+  removal:{fr:"Retrait d'une ancienne clôture",en:"Remove existing fence"},
+  cust:{fr:"Vos coordonnées",en:"Your contact details"},
+  cName:{fr:"Nom complet",en:"Full name"},cPhone:{fr:"Téléphone",en:"Phone"},
+  cEmail:{fr:"Courriel",en:"Email"},cPostal:{fr:"Code postal / ville",en:"Postal code / city"},
+  cMsg:{fr:"Détails du projet (optionnel)",en:"Project details (optional)"},
+  thItem:{fr:"Détail",en:"Item"},thAmt:{fr:"Montant",en:"Amount"},
+  oNote:{fr:"Estimation approximative — à confirmer par notre équipe.",en:"Ballpark estimate — to be confirmed by our team."},
+  numPending:{fr:"N° attribué à l'envoi",en:"No. assigned on send"},
+  btnSend:{fr:"Enregistrer et envoyer l'estimation",en:"Save & send estimate"},
+  disclaimer:{fr:"Estimation indicative basée sur les informations fournies. Le prix final est confirmé après évaluation. Conservez votre numéro d'estimation.",en:"Indicative estimate based on the information provided. Final price confirmed after assessment. Keep your estimate number."},
+  loginTitle:{fr:"Connexion à l'espace équipe",en:"Team area login"},
+  loginSub:{fr:"Vendeurs et administrateurs. Un lien de connexion vous sera envoyé par courriel.",en:"Salespeople and admins. A sign-in link will be emailed to you."},
+  email:{fr:"Courriel",en:"Email"},
+  doLogin:{fr:"Envoyer le lien de connexion",en:"Send sign-in link"},
+  loginHint:{fr:"Pas de mot de passe — vous recevrez un lien magique par courriel. Cliquez-le pour vous connecter.",en:"No password — you'll get a magic link by email. Click it to sign in."},
+  linkSent:{fr:"Lien envoyé ! Vérifiez votre boîte courriel (et les indésirables).",en:"Link sent! Check your inbox (and spam)."},
+  dashTitle:{fr:"Tableau de bord",en:"Dashboard"},
+  dashSubSales:{fr:"Vos estimations et nouveaux devis.",en:"Your estimates and new quotes."},
+  dashSubAdmin:{fr:"Toutes les estimations, tarifs et utilisateurs.",en:"All estimates, pricing and users."},
+  tabEst:{fr:"Estimations",en:"Estimates"},tabCfg:{fr:"Tarifs (config)",en:"Pricing (config)"},tabUsers:{fr:"Utilisateurs",en:"Users"},
+  estListH:{fr:"Estimations",en:"Estimates"},btnNew:{fr:"+ Nouvelle estimation",en:"+ New estimate"},
+  thNo:{fr:"N°",en:"No."},thCust:{fr:"Client",en:"Customer"},thProd:{fr:"Produit",en:"Product"},
+  thRange:{fr:"Fourchette",en:"Range"},thBy:{fr:"Par",en:"By"},thStatus:{fr:"Statut",en:"Status"},thDate:{fr:"Date",en:"Date"},
+  noEst:{fr:"Aucune estimation pour le moment.",en:"No estimates yet."},
+  cfgH:{fr:"Tarifs par type de clôture",en:"Pricing by fence type"},
+  cfgHelp:{fr:"Prix installé par pied linéaire, par hauteur. Enregistré dans la base de données.",en:"Installed price per linear foot, by height. Saved to the database."},
+  cfgExtrasH:{fr:"Suppléments et réglages",en:"Add-ons & settings"},
+  lcWalk:{fr:"Barrière piétonne ($)",en:"Walk gate ($)"},lcDrive:{fr:"Barrière double ($)",en:"Double gate ($)"},
+  lcRemoval:{fr:"Retrait ($/pied)",en:"Removal ($/ft)"},lcSlope:{fr:"Supplément pente (%)",en:"Slope surcharge (%)"},
+  lcRange:{fr:"Largeur fourchette (±%)",en:"Range spread (±%)"},lcMin:{fr:"Projet minimum ($)",en:"Minimum project ($)"},
+  btnSaveCfg:{fr:"Enregistrer les tarifs",en:"Save pricing"},
+  cfgSaved:{fr:"Tarifs enregistrés.",en:"Pricing saved."},
+  usrH:{fr:"Utilisateurs",en:"Users"},
+  usrHelp:{fr:"Comptes pouvant se connecter. Changez un rôle dans la liste.",en:"Accounts that can log in. Change a role in the list."},
+  thUEmail:{fr:"Courriel",en:"Email"},thURole:{fr:"Rôle",en:"Role"},
+  roleAdmin:{fr:"Administrateur",en:"Admin"},roleSales:{fr:"Vendeur",en:"Salesperson"},
+  invite:{fr:"Pour ajouter un vendeur : demandez-lui d'ouvrir ce site, d'aller à « Connexion » et d'entrer son courriel. Après sa première connexion, son compte apparaîtra ici et vous pourrez ajuster son rôle.",en:"To add a salesperson: ask them to open this site, click \"Log in\" and enter their email. After their first sign-in their account appears here and you can adjust their role."},
+  footer:{fr:"MT Clôture Élégance · (438) 221-5352 · clotureelegance@outlook.com",en:"MT Clôture Élégance · (438) 221-5352 · clotureelegance@outlook.com"},
+  ratePer:{fr:"$/pied",en:"$/ft"},
+  sending:{fr:"Envoi…",en:"Sending…"},
+  needContact:{fr:"Veuillez entrer votre nom et courriel.",en:"Please enter your name and email."},
+  saveErr:{fr:"Erreur lors de l'enregistrement. Réessayez.",en:"Error saving. Please try again."}
+};
+let lang='fr';
+
+/* ================= state ================= */
+let config={products:[],walkGate:450,driveGate:1200,removalPerFt:6,slopePct:12,rangePct:15,minProject:1500};
+let session=null, profile=null, lastEstimate=null, lastNo=null;
+
+/* ================= i18n apply ================= */
+function setText(id,key){const el=document.getElementById(id);if(el&&T[key])el.textContent=T[key][lang];}
+function ph(id,key){const el=document.getElementById(id);if(el&&T[key])el.placeholder=T[key][lang];}
+function tx(){
+  ['tagline','loginBtn','dashBtn','logoutBtn'].forEach(k=>setText(k,k));
+  setText('t-est-title','estTitle');setText('t-est-sub','estSub');
+  setText('l-product','product');setText('l-height','height');setText('l-length','length');
+  setText('h-length','lengthHelp');setText('l-walk','walk');setText('l-drive','drive');
+  setText('l-terrain','terrain');setText('l-removal','removal');setText('l-cust','cust');
+  setText('th-item','thItem');setText('th-amt','thAmt');setText('o-note','oNote');
+  setText('btn-send','btnSend');setText('disclaimer','disclaimer');
+  setText('t-login-title','loginTitle');setText('t-login-sub','loginSub');
+  setText('l-email','email');setText('btn-dologin','doLogin');setText('login-hint','loginHint');
+  setText('t-dash-title','dashTitle');setText('est-list-h','estListH');setText('btn-new-est','btnNew');
+  setText('th-no','thNo');setText('th-cust','thCust');setText('th-prod','thProd');
+  setText('th-range','thRange');setText('th-by','thBy');setText('th-status','thStatus');setText('th-date','thDate');
+  setText('cfg-h','cfgH');setText('cfg-help','cfgHelp');setText('cfg-extras-h','cfgExtrasH');
+  setText('lc-walk','lcWalk');setText('lc-drive','lcDrive');setText('lc-removal','lcRemoval');
+  setText('lc-slope','lcSlope');setText('lc-range','lcRange');setText('lc-min','lcMin');
+  setText('btn-savecfg','btnSaveCfg');setText('usr-h','usrH');setText('usr-help','usrHelp');
+  setText('th-uemail','thUEmail');setText('th-urole','thURole');setText('footer','footer');
+  document.getElementById('tab-est-btn').textContent=T.tabEst[lang];
+  document.getElementById('tab-config-btn').textContent=T.tabCfg[lang];
+  document.getElementById('tab-users-btn').textContent=T.tabUsers[lang];
+  document.getElementById('usr-invite').textContent=T.invite[lang];
+  ph('c-name','cName');ph('c-phone','cPhone');ph('c-email','cEmail');ph('c-postal','cPostal');ph('c-msg','cMsg');
+  document.querySelectorAll('[data-fr]').forEach(o=>o.textContent=o.getAttribute('data-'+lang));
+  if(!lastNo)document.getElementById('o-num').textContent=T.numPending[lang];
+}
+function money(n){return new Intl.NumberFormat(lang==='fr'?'fr-CA':'en-CA',{style:'currency',currency:'CAD',maximumFractionDigits:0}).format(n);}
+function setLang(l){lang=l;document.documentElement.lang=l;
+  document.getElementById('lang-fr').classList.toggle('active',l==='fr');
+  document.getElementById('lang-en').classList.toggle('active',l==='en');
+  tx();renderProducts();renderHeights();calc();renderConfig();}
+
+/* ================= nav ================= */
+function go(v){document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  if(v==='dash'){loadEstimates();renderConfig();loadUsers();}window.scrollTo(0,0);}
+function refreshAuthUI(){
+  const w=document.getElementById('whoami');
+  if(session){
+    const r=profile&&profile.role==='admin';
+    w.innerHTML=session.user.email+' '+(r?'<span class="badge-admin">ADMIN</span>':'<span class="badge-sales">'+(lang==='fr'?'VENTE':'SALES')+'</span>');
+    document.getElementById('loginBtn').style.display='none';
+    document.getElementById('dashBtn').style.display='';
+    document.getElementById('logoutBtn').style.display='';
+  }else{
+    w.textContent='';
+    document.getElementById('loginBtn').style.display='';
+    document.getElementById('dashBtn').style.display='none';
+    document.getElementById('logoutBtn').style.display='none';
+  }
+}
+
+/* ================= load pricing ================= */
+async function loadConfig(){
+  const [{data:prods},{data:heights},{data:st}] = await Promise.all([
+    sb.from('products').select('*').eq('active',true).order('sort'),
+    sb.from('product_heights').select('*').order('height_ft'),
+    sb.from('settings').select('*').eq('id',1).single()
+  ]);
+  config.products=(prods||[]).map(p=>({id:p.id,name:{fr:p.name_fr,en:p.name_en},
+    heights:(heights||[]).filter(h=>h.product_id===p.id).map(h=>({id:h.id,ft:Number(h.height_ft),rate:Number(h.rate)}))}));
+  if(st){config.walkGate=Number(st.walk_gate);config.driveGate=Number(st.drive_gate);
+    config.removalPerFt=Number(st.removal_per_ft);config.slopePct=Number(st.slope_pct);
+    config.rangePct=Number(st.range_pct);config.minProject=Number(st.min_project);}
+}
+
+/* ================= estimator ================= */
+function renderProducts(){const sel=document.getElementById('f-product');const cur=sel.value;sel.innerHTML='';
+  config.products.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name[lang];sel.appendChild(o);});
+  if(cur)sel.value=cur;}
+function renderHeights(){const p=config.products.find(x=>x.id===document.getElementById('f-product').value)||config.products[0];
+  const sel=document.getElementById('f-height');const cur=sel.value;sel.innerHTML='';if(!p)return;
+  p.heights.forEach(h=>{const o=document.createElement('option');o.value=h.ft;o.textContent=h.ft+(lang==='fr'?' pi':' ft')+' — '+money(h.rate)+'/'+(lang==='fr'?'pi':'ft');sel.appendChild(o);});
+  if(cur&&[...sel.options].some(o=>o.value===cur))sel.value=cur;}
+function curRate(){const p=config.products.find(x=>x.id===document.getElementById('f-product').value);
+  const ft=parseFloat(document.getElementById('f-height').value);const h=p.heights.find(x=>x.ft===ft)||p.heights[0];return{p,rate:h.rate,ft:h.ft};}
+function calc(){
+  if(!config.products.length)return;
+  const len=Math.max(0,parseFloat(document.getElementById('f-length').value)||0);
+  const walk=Math.max(0,parseInt(document.getElementById('f-walk').value)||0);
+  const drive=Math.max(0,parseInt(document.getElementById('f-drive').value)||0);
+  const slope=document.getElementById('f-terrain').value==='1';
+  const removal=document.getElementById('f-removal').value==='1';
+  const {p,rate,ft}=curRate();
+  const base=len*rate;
+  const slopeAdd=slope?base*config.slopePct/100:0;
+  const gateAdd=walk*config.walkGate+drive*config.driveGate;
+  const remAdd=removal?len*config.removalPerFt:0;
+  let sub=Math.max(base+slopeAdd+gateAdd+remAdd,config.minProject);
+  const low=Math.round(sub*(1-config.rangePct/100)/50)*50;
+  const high=Math.round(sub*(1+config.rangePct/100)/50)*50;
+  const L=document.getElementById('o-lines');L.innerHTML='';
+  const add=(n,v)=>L.insertAdjacentHTML('beforeend',`<tr><td>${n}</td><td class="r">${v}</td></tr>`);
+  add((lang==='fr'?'Clôture':'Fence')+` — ${len} ${lang==='fr'?'pi':'ft'} × ${money(rate)}`,money(base));
+  if(slopeAdd)add((lang==='fr'?'Terrain en pente':'Sloped terrain')+` (${config.slopePct}%)`,money(slopeAdd));
+  if(walk)add((lang==='fr'?'Barrières piétonnes':'Walk gates')+` ×${walk}`,money(walk*config.walkGate));
+  if(drive)add((lang==='fr'?'Barrières doubles':'Double gates')+` ×${drive}`,money(drive*config.driveGate));
+  if(remAdd)add((lang==='fr'?'Retrait ancienne clôture':'Old fence removal'),money(remAdd));
+  document.getElementById('o-range').textContent=money(low)+' – '+money(high);
+  lastEstimate={prodId:p.id,prodName:p.name[lang],rate,ft,len,walk,drive,slope,removal,low,high};
+}
+
+async function sendEstimate(){
+  const name=document.getElementById('c-name').value.trim();
+  const email=document.getElementById('c-email').value.trim();
+  const m=document.getElementById('send-msg');const btn=document.getElementById('btn-send');
+  if(!name||!email){m.className='msg err';m.textContent=T.needContact[lang];return;}
+  if(!lastEstimate){calc();}
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> '+T.sending[lang];m.className='msg';m.textContent='';
+  const row={
+    customer_name:name,customer_email:email,
+    customer_phone:document.getElementById('c-phone').value.trim(),
+    customer_postal:document.getElementById('c-postal').value.trim(),
+    message:document.getElementById('c-msg').value.trim(),
+    product_id:lastEstimate.prodId,product_name:lastEstimate.prodName,
+    height_ft:lastEstimate.ft,length_ft:lastEstimate.len,
+    walk_gates:lastEstimate.walk,drive_gates:lastEstimate.drive,
+    terrain:lastEstimate.slope?'sloped':'normal',removal:lastEstimate.removal,
+    price_low:lastEstimate.low,price_high:lastEstimate.high,
+    created_by_email:session?session.user.email:'public',
+    created_by_uid:session?session.user.id:null,status:'new'
+  };
+  const {data,error}=await sb.from('estimates').insert(row).select('est_no').single();
+  btn.disabled=false;setText('btn-send','btnSend');
+  if(error){m.className='msg err';m.textContent=T.saveErr[lang]+' ('+error.message+')';return;}
+  lastNo=data.est_no;document.getElementById('o-num').textContent=lastNo;
+  m.className='msg ok';
+  m.innerHTML=(lang==='fr'?`Estimation <b>${lastNo}</b> enregistrée. `:`Estimate <b>${lastNo}</b> saved. `)+
+    `<a href="${mailtoLink(lastNo,name,email)}">${lang==='fr'?'Ouvrir le courriel à l\'entreprise':'Open email to company'}</a>`;
+}
+function mailtoLink(no,name,email){
+  const s=encodeURIComponent(`${lang==='fr'?'Estimation':'Estimate'} ${no} — ${name}`);
+  const b=encodeURIComponent(`${lang==='fr'?'Numéro':'Number'}: ${no}\n${lang==='fr'?'Client':'Customer'}: ${name} (${email})\n`+
+    `${lang==='fr'?'Produit':'Product'}: ${lastEstimate.prodName} — ${lastEstimate.ft}${lang==='fr'?'pi':'ft'} × ${lastEstimate.len}${lang==='fr'?'pi':'ft'}\n`+
+    `${lang==='fr'?'Fourchette':'Range'}: ${money(lastEstimate.low)} – ${money(lastEstimate.high)}\n`);
+  return `mailto:${COMPANY_EMAIL}?subject=${s}&body=${b}`;
+}
+
+/* ================= auth ================= */
+async function sendMagicLink(){
+  const email=document.getElementById('li-email').value.trim();const m=document.getElementById('login-msg');
+  if(!email||!email.includes('@')){m.className='msg err';m.textContent=lang==='fr'?'Courriel invalide.':'Invalid email.';return;}
+  m.className='msg info';m.innerHTML='<span class="spin"></span> …';
+  const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.origin}});
+  if(error){m.className='msg err';m.textContent=error.message;return;}
+  m.className='msg ok';m.textContent=T.linkSent[lang];
+}
+async function logout(){await sb.auth.signOut();session=null;profile=null;refreshAuthUI();go('estimator');}
+async function loadProfile(){
+  if(!session){profile=null;return;}
+  const {data}=await sb.from('profiles').select('*').eq('id',session.user.id).maybeSingle();
+  profile=data||{role:'sales',email:session.user.email};
+}
+
+/* ================= dashboard ================= */
+function setTab(t){document.querySelectorAll('#dash-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+  document.getElementById('tab-estimates').style.display=t==='estimates'?'':'none';
+  document.getElementById('tab-config').style.display=t==='config'?'':'none';
+  document.getElementById('tab-users').style.display=t==='users'?'':'none';}
+function applyRoleUI(){
+  const admin=profile&&profile.role==='admin';
+  document.getElementById('t-dash-sub').textContent=admin?T.dashSubAdmin[lang]:T.dashSubSales[lang];
+  document.getElementById('tab-config-btn').style.display=admin?'':'none';
+  document.getElementById('tab-users-btn').style.display=admin?'':'none';
+  if(!admin)setTab('estimates');
+}
+async function loadEstimates(){
+  if(!session)return;applyRoleUI();
+  const rows=document.getElementById('est-rows');rows.innerHTML=`<tr><td colspan="7"><span class="spin"></span></td></tr>`;
+  const {data,error}=await sb.from('estimates').select('*').order('created_at',{ascending:false});
+  rows.innerHTML='';
+  if(error){rows.innerHTML=`<tr><td colspan="7" style="color:var(--err)">${error.message}</td></tr>`;return;}
+  if(!data.length){rows.innerHTML=`<tr><td colspan="7" style="color:var(--muted)">${T.noEst[lang]}</td></tr>`;return;}
+  data.forEach(e=>{
+    const by=e.created_by_email==='public'?(lang==='fr'?'Site web':'Website'):(e.created_by_email||'').split('@')[0];
+    const d=new Date(e.created_at).toLocaleDateString(lang==='fr'?'fr-CA':'en-CA');
+    rows.insertAdjacentHTML('beforeend',
+      `<tr><td><b>${e.est_no||''}</b></td><td>${esc(e.customer_name)}</td><td>${esc(e.product_name)}</td>
+       <td class="r">${money(e.price_low)} – ${money(e.price_high)}</td><td>${esc(by)}</td>
+       <td><span class="pill ${e.status}">${statusLabel(e.status)}</span></td><td>${d}</td></tr>`);
+  });
+}
+function statusLabel(s){const m={new:{fr:'Nouvelle',en:'New'},sent:{fr:'Envoyée',en:'Sent'},quoted:{fr:'Devis',en:'Quoted'},won:{fr:'Gagné',en:'Won'},lost:{fr:'Perdu',en:'Lost'}};return (m[s]||{fr:s,en:s})[lang];}
+function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+function renderConfig(){
+  if(!(profile&&profile.role==='admin'))return;
+  const wrap=document.getElementById('cfg-products');if(!wrap)return;wrap.innerHTML='';
+  config.products.forEach((p,pi)=>{let html=`<div class="config-prod"><h3>${p.name[lang]}</h3>`;
+    p.heights.forEach((h,hi)=>{html+=`<div class="ht-row"><span class="lbl">${h.ft} ${lang==='fr'?'pi':'ft'}</span>
+      <input type="number" value="${h.rate}" onchange="config.products[${pi}].heights[${hi}].rate=parseFloat(this.value)||0">
+      <span class="help">${T.ratePer[lang]}</span></div>`;});
+    html+='</div>';wrap.insertAdjacentHTML('beforeend',html);});
+  document.getElementById('cfg-walk').value=config.walkGate;
+  document.getElementById('cfg-drive').value=config.driveGate;
+  document.getElementById('cfg-removal').value=config.removalPerFt;
+  document.getElementById('cfg-slope').value=config.slopePct;
+  document.getElementById('cfg-range').value=config.rangePct;
+  document.getElementById('cfg-min').value=config.minProject;
+}
+async function saveConfig(){
+  const m=document.getElementById('cfg-msg');m.className='msg info';m.innerHTML='<span class="spin"></span>';
+  config.walkGate=+document.getElementById('cfg-walk').value||0;
+  config.driveGate=+document.getElementById('cfg-drive').value||0;
+  config.removalPerFt=+document.getElementById('cfg-removal').value||0;
+  config.slopePct=+document.getElementById('cfg-slope').value||0;
+  config.rangePct=+document.getElementById('cfg-range').value||0;
+  config.minProject=+document.getElementById('cfg-min').value||0;
+  const updates=[];
+  updates.push(sb.from('settings').update({walk_gate:config.walkGate,drive_gate:config.driveGate,
+    removal_per_ft:config.removalPerFt,slope_pct:config.slopePct,range_pct:config.rangePct,min_project:config.minProject}).eq('id',1));
+  config.products.forEach(p=>p.heights.forEach(h=>updates.push(sb.from('product_heights').update({rate:h.rate}).eq('id',h.id))));
+  const res=await Promise.all(updates);
+  const err=res.find(r=>r.error);
+  if(err){m.className='msg err';m.textContent=err.error.message;return;}
+  m.className='msg ok';m.textContent=T.cfgSaved[lang];renderHeights();calc();
+}
+
+async function loadUsers(){
+  if(!(profile&&profile.role==='admin'))return;
+  const rows=document.getElementById('usr-rows');rows.innerHTML=`<tr><td colspan="2"><span class="spin"></span></td></tr>`;
+  const {data,error}=await sb.from('profiles').select('id,email,role').order('email');
+  rows.innerHTML='';
+  if(error){rows.innerHTML=`<tr><td colspan="2" style="color:var(--err)">${error.message}</td></tr>`;return;}
+  data.forEach(u=>{rows.insertAdjacentHTML('beforeend',
+    `<tr><td>${esc(u.email)}</td><td>
+      <select onchange="changeRole('${u.id}',this.value)">
+        <option value="sales" ${u.role==='sales'?'selected':''}>${T.roleSales[lang]}</option>
+        <option value="admin" ${u.role==='admin'?'selected':''}>${T.roleAdmin[lang]}</option>
+      </select></td></tr>`);});
+}
+async function changeRole(id,role){await sb.from('profiles').update({role}).eq('id',id);if(id===session.user.id){profile.role=role;refreshAuthUI();applyRoleUI();}}
+
+/* ================= init ================= */
+async function init(){
+  tx();
+  await loadConfig();
+  renderProducts();renderHeights();calc();
+  const {data:{session:s}}=await sb.auth.getSession();
+  session=s;await loadProfile();refreshAuthUI();
+  sb.auth.onAuthStateChange(async(_e,s2)=>{session=s2;await loadProfile();refreshAuthUI();
+    if(session){applyRoleUI();go('dash');}});
+  document.getElementById('boot').style.display='none';
+}
+init();
+</script>
+</body>
+</html>
