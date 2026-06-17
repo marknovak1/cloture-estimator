@@ -425,23 +425,20 @@ async function sendEstimate(){
   if(!name||!email){m.className='msg err';m.textContent=T.needContact[lang];return;}
   if(!lastEstimate){calc();}
   btn.disabled=true;btn.innerHTML='<span class="spin"></span> '+T.sending[lang];m.className='msg';m.textContent='';
-  const row={
-    customer_name:name,customer_email:email,
-    customer_phone:document.getElementById('c-phone').value.trim(),
-    customer_postal:document.getElementById('c-postal').value.trim(),
-    message:document.getElementById('c-msg').value.trim(),
-    product_id:lastEstimate.prodId,product_name:lastEstimate.prodName,
-    height_ft:lastEstimate.ft,length_ft:lastEstimate.len,
-    walk_gates:lastEstimate.walk,drive_gates:lastEstimate.drive,
-    terrain:lastEstimate.slope?'sloped':'normal',removal:lastEstimate.removal,
-    price_low:lastEstimate.low,price_high:lastEstimate.high,
-    created_by_email:session?session.user.email:'public',
-    created_by_uid:session?session.user.id:null,status:'new'
-  };
-  const {data,error}=await sb.from('estimates').insert(row).select('est_no').single();
+  const {data,error}=await sb.rpc('submit_estimate',{
+    p_customer_name:name, p_customer_email:email,
+    p_customer_phone:document.getElementById('c-phone').value.trim(),
+    p_customer_postal:document.getElementById('c-postal').value.trim(),
+    p_message:document.getElementById('c-msg').value.trim(),
+    p_product_id:lastEstimate.prodId, p_product_name:lastEstimate.prodName,
+    p_height_ft:lastEstimate.ft, p_length_ft:lastEstimate.len,
+    p_walk_gates:lastEstimate.walk, p_drive_gates:lastEstimate.drive,
+    p_terrain:lastEstimate.slope?'sloped':'normal', p_removal:lastEstimate.removal,
+    p_price_low:lastEstimate.low, p_price_high:lastEstimate.high
+  });
   btn.disabled=false;setText('btn-send','btnSend');
   if(error){m.className='msg err';m.textContent=T.saveErr[lang]+' ('+error.message+')';return;}
-  lastNo=data.est_no;document.getElementById('o-num').textContent=lastNo;
+  lastNo=data;document.getElementById('o-num').textContent=lastNo;
   m.className='msg ok';
   m.innerHTML=(lang==='fr'?`Estimation <b>${lastNo}</b> enregistrée. `:`Estimate <b>${lastNo}</b> saved. `)+
     `<a href="${mailtoLink(lastNo,name,email)}">${lang==='fr'?'Ouvrir le courriel à l\'entreprise':'Open email to company'}</a>`;
@@ -564,3 +561,4 @@ init();
 </script>
 </body>
 </html>
+                                                                                                                                         
