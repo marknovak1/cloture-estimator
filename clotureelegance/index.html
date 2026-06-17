@@ -57,7 +57,14 @@
   .tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
   .tabs button{background:#fff;border:1px solid var(--line);padding:9px 15px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--charcoal)}
   .tabs button.active{background:var(--charcoal);color:#fff;border-color:var(--charcoal)}
-  .login-wrap{max-width:400px;margin:50px auto}
+  .login-wrap{max-width:400px;margin:40px auto}
+  .login-head{text-align:center;margin-bottom:18px}
+  .mark.big{width:56px;height:56px;border-radius:10px;font-size:20px;margin:0 auto 12px;border-width:3px}
+  .login-brand{font-size:20px;font-weight:600;letter-spacing:.5px}
+  .login-tag{font-size:14px;color:var(--gold-d);font-weight:600;margin-top:2px}
+  .login-alt{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:14px;font-size:13px;color:var(--muted)}
+  .login-alt a{color:var(--gold-d);text-decoration:none;font-weight:600}
+  .login-alt a:hover{text-decoration:underline}
   .msg{padding:10px 12px;border-radius:8px;font-size:13px;margin-top:10px;display:none}
   .msg.ok{background:#e8f1ec;color:var(--ok);display:block}
   .msg.err{background:#fbeaea;color:var(--err);display:block}
@@ -171,13 +178,26 @@
 
   <!-- ============ LOGIN ============ -->
   <section id="view-login" class="view">
-    <div class="login-wrap card">
-      <h1 id="t-login-title" style="font-size:21px"></h1>
-      <p class="sub" id="t-login-sub" style="margin-bottom:16px"></p>
-      <label id="l-email"></label>
-      <input id="li-email" type="email" autocomplete="email" placeholder="nom@clotureelegance.com">
-      <button class="btn" style="width:100%;margin-top:16px" id="btn-dologin" onclick="sendMagicLink()"></button>
-      <div class="msg" id="login-msg"></div>
+    <div class="login-wrap">
+      <div class="login-head">
+        <div class="mark big" style="border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700">CE</div>
+        <div class="login-brand">MT Clôture Élégance</div>
+        <div class="login-tag" id="t-login-title"></div>
+        <p class="sub" id="t-login-sub" style="margin:6px 0 0"></p>
+      </div>
+      <div class="card">
+        <label id="l-email"></label>
+        <input id="li-email" type="email" autocomplete="email" placeholder="nom@clotureelegance.com">
+        <label id="l-pass" style="margin-top:12px"></label>
+        <input id="li-pass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')pwLogin()">
+        <button class="btn" style="width:100%;margin-top:16px" id="btn-pwlogin" onclick="pwLogin()"></button>
+        <div class="login-alt">
+          <a href="#" id="lnk-signup" onclick="toggleSignup(event)"></a>
+          <span>·</span>
+          <a href="#" id="lnk-magic" onclick="magicLink(event)"></a>
+        </div>
+        <div class="msg" id="login-msg"></div>
+      </div>
       <div class="seed" id="login-hint"></div>
     </div>
   </section>
@@ -227,6 +247,20 @@
 
     <div id="tab-users" style="display:none">
       <div class="card">
+        <strong id="usr-create-h"></strong>
+        <p class="help" id="usr-create-help"></p>
+        <div class="grid g3" style="margin-top:6px;align-items:end">
+          <div><label id="lu-email2"></label><input id="nu-email" type="email" placeholder="nom@clotureelegance.com"></div>
+          <div><label id="lu-pass2"></label><input id="nu-pass" type="text" placeholder="min. 6 caractères"></div>
+          <div><label id="lu-role2"></label><select id="nu-role">
+            <option value="sales" data-fr="Vendeur" data-en="Salesperson"></option>
+            <option value="admin" data-fr="Administrateur" data-en="Admin"></option>
+          </select></div>
+        </div>
+        <button class="btn" style="margin-top:14px" id="btn-createuser" onclick="createUser()"></button>
+        <div class="msg" id="cu-msg"></div>
+      </div>
+      <div class="card">
         <strong id="usr-h"></strong>
         <p class="help" id="usr-help"></p>
         <table><thead><tr><th id="th-uemail"></th><th id="th-urole"></th></tr></thead>
@@ -274,12 +308,19 @@ const T = {
   numPending:{fr:"N° attribué à l'envoi",en:"No. assigned on send"},
   btnSend:{fr:"Enregistrer et envoyer l'estimation",en:"Save & send estimate"},
   disclaimer:{fr:"Estimation indicative basée sur les informations fournies. Le prix final est confirmé après évaluation. Conservez votre numéro d'estimation.",en:"Indicative estimate based on the information provided. Final price confirmed after assessment. Keep your estimate number."},
-  loginTitle:{fr:"Connexion à l'espace équipe",en:"Team area login"},
-  loginSub:{fr:"Vendeurs et administrateurs. Un lien de connexion vous sera envoyé par courriel.",en:"Salespeople and admins. A sign-in link will be emailed to you."},
+  loginTitle:{fr:"Espace équipe",en:"Team area"},
+  loginSub:{fr:"Connectez-vous pour gérer vos estimations.",en:"Sign in to manage your estimates."},
   email:{fr:"Courriel",en:"Email"},
-  doLogin:{fr:"Envoyer le lien de connexion",en:"Send sign-in link"},
-  loginHint:{fr:"Pas de mot de passe — vous recevrez un lien magique par courriel. Cliquez-le pour vous connecter.",en:"No password — you'll get a magic link by email. Click it to sign in."},
+  pass:{fr:"Mot de passe",en:"Password"},
+  pwLoginBtn:{fr:"Se connecter",en:"Sign in"},
+  signupBtn:{fr:"Créer mon compte",en:"Create my account"},
+  signupLink:{fr:"Créer un compte",en:"Create account"},
+  haveAccount:{fr:"J'ai déjà un compte",en:"I already have an account"},
+  magicLinkLink:{fr:"M'envoyer un lien par courriel",en:"Email me a link instead"},
+  loginHint:{fr:"Connectez-vous avec votre mot de passe, ou recevez un lien magique par courriel. Nouveau ? Créez un compte.",en:"Sign in with your password, or get a magic link by email. New here? Create an account."},
   linkSent:{fr:"Lien envoyé ! Vérifiez votre boîte courriel (et les indésirables).",en:"Link sent! Check your inbox (and spam)."},
+  signupOk:{fr:"Compte créé. Vérifiez votre courriel pour confirmer, puis connectez-vous.",en:"Account created. Check your email to confirm, then sign in."},
+  needEmailPass:{fr:"Entrez un courriel et un mot de passe (min. 6 caractères).",en:"Enter an email and password (min. 6 characters)."},
   dashTitle:{fr:"Tableau de bord",en:"Dashboard"},
   dashSubSales:{fr:"Vos estimations et nouveaux devis.",en:"Your estimates and new quotes."},
   dashSubAdmin:{fr:"Toutes les estimations, tarifs et utilisateurs.",en:"All estimates, pricing and users."},
@@ -296,8 +337,13 @@ const T = {
   lcRange:{fr:"Largeur fourchette (±%)",en:"Range spread (±%)"},lcMin:{fr:"Projet minimum ($)",en:"Minimum project ($)"},
   btnSaveCfg:{fr:"Enregistrer les tarifs",en:"Save pricing"},
   cfgSaved:{fr:"Tarifs enregistrés.",en:"Pricing saved."},
+  usrCreateH:{fr:"Créer un utilisateur",en:"Create a user"},
+  usrCreateHelp:{fr:"Crée un compte avec un mot de passe initial et un rôle. Transmettez-lui le mot de passe ; il devra peut-être confirmer son courriel avant de se connecter.",en:"Creates an account with an initial password and role. Share the password with them; they may need to confirm their email before signing in."},
+  luEmail2:{fr:"Courriel",en:"Email"},luPass2:{fr:"Mot de passe initial",en:"Initial password"},luRole2:{fr:"Rôle",en:"Role"},
+  btnCreateUser:{fr:"Créer l'utilisateur",en:"Create user"},
+  userCreated:{fr:"Utilisateur créé : ",en:"User created: "},
   usrH:{fr:"Utilisateurs",en:"Users"},
-  usrHelp:{fr:"Comptes pouvant se connecter. Changez un rôle dans la liste.",en:"Accounts that can log in. Change a role in the list."},
+  usrHelp:{fr:"Comptes existants. Changez un rôle dans la liste.",en:"Existing accounts. Change a role in the list."},
   thUEmail:{fr:"Courriel",en:"Email"},thURole:{fr:"Rôle",en:"Role"},
   roleAdmin:{fr:"Administrateur",en:"Admin"},roleSales:{fr:"Vendeur",en:"Salesperson"},
   invite:{fr:"Pour ajouter un vendeur : demandez-lui d'ouvrir ce site, d'aller à « Connexion » et d'entrer son courriel. Après sa première connexion, son compte apparaîtra ici et vous pourrez ajuster son rôle.",en:"To add a salesperson: ask them to open this site, click \"Log in\" and enter their email. After their first sign-in their account appears here and you can adjust their role."},
@@ -311,7 +357,7 @@ let lang='fr';
 
 /* ================= state ================= */
 let config={products:[],walkGate:450,driveGate:1200,removalPerFt:6,slopePct:12,rangePct:15,minProject:1500};
-let session=null, profile=null, lastEstimate=null, lastNo=null;
+let session=null, profile=null, lastEstimate=null, lastNo=null, loginMode='in';
 
 /* ================= i18n apply ================= */
 function setText(id,key){const el=document.getElementById(id);if(el&&T[key])el.textContent=T[key][lang];}
@@ -325,7 +371,10 @@ function tx(){
   setText('th-item','thItem');setText('th-amt','thAmt');setText('o-note','oNote');
   setText('btn-send','btnSend');setText('disclaimer','disclaimer');
   setText('t-login-title','loginTitle');setText('t-login-sub','loginSub');
-  setText('l-email','email');setText('btn-dologin','doLogin');setText('login-hint','loginHint');
+  setText('l-email','email');setText('l-pass','pass');setText('login-hint','loginHint');
+  document.getElementById('btn-pwlogin').textContent=(loginMode==='up'?T.signupBtn:T.pwLoginBtn)[lang];
+  document.getElementById('lnk-signup').textContent=(loginMode==='up'?T.haveAccount:T.signupLink)[lang];
+  document.getElementById('lnk-magic').textContent=T.magicLinkLink[lang];
   setText('t-dash-title','dashTitle');setText('est-list-h','estListH');setText('btn-new-est','btnNew');
   setText('th-no','thNo');setText('th-cust','thCust');setText('th-prod','thProd');
   setText('th-range','thRange');setText('th-by','thBy');setText('th-status','thStatus');setText('th-date','thDate');
@@ -333,6 +382,9 @@ function tx(){
   setText('lc-walk','lcWalk');setText('lc-drive','lcDrive');setText('lc-removal','lcRemoval');
   setText('lc-slope','lcSlope');setText('lc-range','lcRange');setText('lc-min','lcMin');
   setText('btn-savecfg','btnSaveCfg');setText('usr-h','usrH');setText('usr-help','usrHelp');
+  setText('usr-create-h','usrCreateH');setText('usr-create-help','usrCreateHelp');
+  setText('lu-email2','luEmail2');setText('lu-pass2','luPass2');setText('lu-role2','luRole2');
+  setText('btn-createuser','btnCreateUser');
   setText('th-uemail','thUEmail');setText('th-urole','thURole');setText('footer','footer');
   document.getElementById('tab-est-btn').textContent=T.tabEst[lang];
   document.getElementById('tab-config-btn').textContent=T.tabCfg[lang];
@@ -452,9 +504,30 @@ function mailtoLink(no,name,email){
 }
 
 /* ================= auth ================= */
-async function sendMagicLink(){
+function toggleSignup(e){if(e)e.preventDefault();loginMode=(loginMode==='in')?'up':'in';
+  document.getElementById('btn-pwlogin').textContent=(loginMode==='up'?T.signupBtn:T.pwLoginBtn)[lang];
+  document.getElementById('lnk-signup').textContent=(loginMode==='up'?T.haveAccount:T.signupLink)[lang];
+  document.getElementById('li-pass').setAttribute('autocomplete',loginMode==='up'?'new-password':'current-password');
+  const m=document.getElementById('login-msg');m.className='msg';m.textContent='';}
+async function pwLogin(){
+  const email=document.getElementById('li-email').value.trim();
+  const pass=document.getElementById('li-pass').value;
+  const m=document.getElementById('login-msg');
+  if(!email||!email.includes('@')||pass.length<6){m.className='msg err';m.textContent=T.needEmailPass[lang];return;}
+  m.className='msg info';m.innerHTML='<span class="spin"></span> …';
+  if(loginMode==='up'){
+    const {error}=await sb.auth.signUp({email,password:pass,options:{emailRedirectTo:window.location.origin}});
+    if(error){m.className='msg err';m.textContent=error.message;return;}
+    m.className='msg ok';m.textContent=T.signupOk[lang];loginMode='in';tx();
+  }else{
+    const {error}=await sb.auth.signInWithPassword({email,password:pass});
+    if(error){m.className='msg err';m.textContent=error.message;return;}
+    m.className='msg';m.textContent='';
+  }
+}
+async function magicLink(e){if(e)e.preventDefault();
   const email=document.getElementById('li-email').value.trim();const m=document.getElementById('login-msg');
-  if(!email||!email.includes('@')){m.className='msg err';m.textContent=lang==='fr'?'Courriel invalide.':'Invalid email.';return;}
+  if(!email||!email.includes('@')){m.className='msg err';m.textContent=lang==='fr'?'Entrez votre courriel.':'Enter your email.';return;}
   m.className='msg info';m.innerHTML='<span class="spin"></span> …';
   const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.origin}});
   if(error){m.className='msg err';m.textContent=error.message;return;}
@@ -545,6 +618,24 @@ async function loadUsers(){
       </select></td></tr>`);});
 }
 async function changeRole(id,role){await sb.from('profiles').update({role}).eq('id',id);if(id===session.user.id){profile.role=role;refreshAuthUI();applyRoleUI();}}
+async function createUser(){
+  const email=document.getElementById('nu-email').value.trim().toLowerCase();
+  const pass=document.getElementById('nu-pass').value;
+  const role=document.getElementById('nu-role').value;
+  const m=document.getElementById('cu-msg');
+  if(!email||!email.includes('@')||pass.length<6){m.className='msg err';m.textContent=T.needEmailPass[lang];return;}
+  m.className='msg info';m.innerHTML='<span class="spin"></span> …';
+  // 1) pre-assign the role so the signup trigger applies it
+  const {error:e1}=await sb.from('allowed_users').upsert({email,role});
+  if(e1){m.className='msg err';m.textContent=e1.message;return;}
+  // 2) create the auth account on a throwaway client so the admin stays logged in
+  const tmp=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:false,storageKey:'cu-tmp'}});
+  const {error:e2}=await tmp.auth.signUp({email,password:pass,options:{emailRedirectTo:window.location.origin}});
+  if(e2){m.className='msg err';m.textContent=e2.message;return;}
+  m.className='msg ok';m.textContent=T.userCreated[lang]+email+' ('+(role==='admin'?T.roleAdmin[lang]:T.roleSales[lang])+').';
+  document.getElementById('nu-email').value='';document.getElementById('nu-pass').value='';
+  loadUsers();
+}
 
 /* ================= init ================= */
 async function init(){
@@ -561,4 +652,3 @@ init();
 </script>
 </body>
 </html>
-                                                                                                                                         
